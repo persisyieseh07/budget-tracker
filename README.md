@@ -15,7 +15,7 @@ No prior knowledge of web development is required.
 
 **Option A: Clone using Git**
 ''bash
-git clone https://github.com/your-username/WiseWallet.git
+git clone (https://github.com/persisyieseh07/budget-tracker)
 
 Option B: Download as ZIP
 
