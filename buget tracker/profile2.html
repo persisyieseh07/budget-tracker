@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WiseWallet - Profile</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #1abc9c;
+      color: #333;
+    }
+    
+
+    header {
+      background: #1abc9c;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      padding: 18px;
+      
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      margin-bottom: 15px;
+      font-size: 18px;
+      color: #1abc9c;
+    }
+    input, select {
+      width: 97%;
+      padding: 8px;
+      margin: 8px ;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1abc9c;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 5px;
+    }
+    button:hover {
+      background: #16a085;
+    }
+    .export-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .warning {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e74c3c;
+      color: white;
+      border-radius: 6px;
+      display: none;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    ul li {
+      background: #ecf0f1;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    /* Footer */
+    .footer {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 40px 20px 20px;
+      margin-top: 50px;
+    }
+
+    .footer-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer h3, 
+    .footer h4 {
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .footer-about p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .footer-links ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-links ul li {
+      margin-bottom: 10px;
+      background-color:#2c3e50;
+    }
+
+    .footer-links ul li a {
+      color: #eff1f1;
+      background-attachment: fixed;
+      text-decoration: none;
+     
+    }
+
+    .footer-links ul li a:hover {
+      color: #1abc9c;
+    }
+
+    .footer-contact p {
+      margin: 8px 0;
+      font-size: 0.95rem;
+    }
+
+    .footer-contact a {
+      color: #1abc9c;
+      text-decoration: none;
+    }
+
+    .footer-contact a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-social .social-icons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .footer-social .social-icons img {
+      width: 22px;
+      height: 22px;
+      filter: brightness(0) invert(1);
+      transition: transform 0.3s ease;
+    }
+
+    .footer-social .social-icons img:hover {
+      transform: scale(1.1);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      margin-top: 30px;
+      padding-top: 15px;
+      font-size: 0.85rem;
+      color: #f6fafd;
+    }
+    
+    canvas {
+      margin-top: 20px;
+    }
+    
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 style="grid-column: span 2; text-align: center; color: white;">WiseWallet - Profile Settings</h1>
+
+  <!-- Profile & Settings -->
+  <div class="card">
+    <h2>Profile Settings</h2>
+    <label>Name:</label>
+    <input type="text" id="userName" placeholder="Enter your name">
+    
+    <label>Budget Mode:</label>
+    <select id="budgetMode">
+      <option value="monthly">Monthly</option>
+      <option value="yearly">Yearly</option>
+    </select>
+
+    <label>Currency:</label>
+    <select id="currencySelect" onchange="updateSummary()">
+      <option value="frcs">Frcs</option>
+      <option value="usd">USD</option>
+      <option value="eur">EUR</option>
+    </select>
+  </div>
+
+  <!-- Income -->
+  <div class="card">
+    <h2>Income</h2>
+    <label>Base Income:</label>
+    <input type="number" id="baseIncome" placeholder="Enter base income">
+    
+    <label>Add Extra Income:</label>
+    <input type="number" id="extraIncome" placeholder="Enter extra income">
+    <input type="month" id="incomeMonth">
+    <button onclick="addExtraIncome()">Add Income</button>
+
+    <ul id="extraIncomeList"></ul>
+  </div>
+
+  <!-- Expenses -->
+  <div class="card">
+    <h2>Expenses</h2>
+    <label>Fixed Expenses:</label>
+    <input type="number" id="fixedExpense" placeholder="Enter fixed expense">
+
+    <label>Add Variable Expense:</label>
+    <input type="text" id="expenseName" placeholder="Expense name">
+    <input type="number" id="expenseAmount" placeholder="Expense amount">
+    <select id="expenseCategory">
+      <option value="Food">Food</option>
+      <option value="Rent">Rent</option>
+      <option value="Entertainment">Entertainment</option>
+      <option value="Transport">Transport</option>
+    </select>
+    <button onclick="addExpense()">Add Expense</button>
+
+    <label>Add Custom Category:</label>
+    <input type="text" id="customCategory" placeholder="New category name">
+    <button onclick="addCustomCategory()">➕ Add Category</button>
+
+    <ul id="expenseList"></ul>
+    <div id="warning" class="warning">⚠ Expenses exceed income! Consider reducing non-essential spending like entertainment.</div>
+  </div>
+
+  <!-- Summary -->
+  <div class="card">
+    <h2>Summary</h2>
+    <p><b>Total Income:</b> <span id="totalIncome">0</span> <span id="currencySymbol">frcs</span></p>
+    <p><b>Total Expenses:</b> <span id="totalExpenses">0</span> <span id="currencySymbol">frcs</span></p>
+    <p><b>Balance:</b> <span id="balance">0</span> <span id="currencySymbol">frcs</span></p>
+
+    <div class="export-btns">
+      <button onclick="exportCSV()">📊 Export CSV</button>
+      <button onclick="exportPDF()">📄 Export PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chart Section -->
+<div class="card" style="margin: 20px;">
+  <h2>Income vs Expenses Chart</h2>
+  <canvas id="financeChart" height="120"></canvas>
+</div>
+
+ <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-about">
+        <h3>WiseWallet</h3>
+        <p>Smart, simple, and secure expense tracking to help you take control of your finances with confidence.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="home.html">Home</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how">How It Works</a></li>
+          <li><a href="login.html">Sign In</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h4>Contact Us</h4>
+        <p>Email: <a href="mailto:support@wisewallet.com">support@wisewallet.com</a></p>
+        <p>Phone: +237692665536</p>
+      </div>
+      <div class="footer-social">
+        <h4>Follow Us</h4>
+        <div class="social-icons">
+          <a href="#"><img src="icons/facebook-logo-24.png" alt="Facebook"></a>
+          <a href="#"><img src="icons/twitter-logo-24.png" alt="Twitter"></a>
+          <a href="#"><img src="icons/linkedin-logo-24.png" alt="LinkedIn"></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; made with love by Persis🤍(●'◡'●).</p>
+    </div>
+  </footer>
+
+
+<script>
+  let incomes = {}; // { "2025-09": [amounts...] }
+  let expenses = []; // [{name, amount, category, month}]
+  let categories = ["Food", "Rent", "Entertainment", "Transport"];
+  let financeChart;
+
+  function getCurrencySymbol(currency) {
+    switch(currency) {
+      case "usd": return "$";
+      case "eur": return "€";
+      default: return "frcs";
+    }
+  }
+
+  function addExtraIncome() {
+    let amount = parseFloat(document.getElementById("extraIncome").value);
+    let month = document.getElementById("incomeMonth").value;
+    if (!isNaN(amount) && month) {
+      if (!incomes[month]) incomes[month] = [];
+      incomes[month].push(amount);
+      updateExtraIncomeList();
+      updateSummary();
+      document.getElementById("extraIncome").value = "";
+    }
+  }
+
+  function updateExtraIncomeList() {
+    let list = document.getElementById("extraIncomeList");
+    list.innerHTML = "";
+    for (let month in incomes) {
+      let total = incomes[month].reduce((sum, inc) => sum + inc, 0);
+      let li = document.createElement("li");
+      li.innerHTML = `📅 ${month}: ${total} Frcs`;
+      list.appendChild(li);
+    }
+  }
+
+  function addExpense() {
+    let name = document.getElementById("expenseName").value;
+    let amount = parseFloat(document.getElementById("expenseAmount").value);
+    let category = document.getElementById("expenseCategory").value;
+    let month = document.getElementById("incomeMonth").value; // attach to same month input
+    if (name && !isNaN(amount) && month) {
+      expenses.push({name, amount, category, month});
+      updateExpenseList();
+      updateSummary();
+      document.getElementById("expenseName").value = "";
+      document.getElementById("expenseAmount").value = "";
+    }
+  }
+
+  function updateExpenseList() {
+    let list = document.getElementById("expenseList");
+    list.innerHTML = "";
+    expenses.forEach((exp, index) => {
+      let li = document.createElement("li");
+      li.innerHTML = `${exp.name} (${exp.category}) [${exp.month}]: ${exp.amount} Frcs
+      <button onclick="removeExpense(${index})">X</button>`;
+      list.appendChild(li);
+    });
+  }
+
+  function removeExpense(index) {
+    expenses.splice(index, 1);
+    updateExpenseList();
+    updateSummary();
+  }
+
+  function addCustomCategory() {
+    let custom = document.getElementById("customCategory").value;
+    if (custom) {
+      categories.push(custom);
+      let select = document.getElementById("expenseCategory");
+      let option = document.createElement("option");
+      option.value = custom;
+      option.text = custom;
+      select.appendChild(option);
+      document.getElementById("customCategory").value = "";
+    }
+  }
+
+  function updateSummary() {
+    let baseIncome = parseFloat(document.getElementById("baseIncome").value) || 0;
+    let fixedExpense = parseFloat(document.getElementById("fixedExpense").value) || 0;
+
+    let totalIncome = baseIncome;
+    for (let month in incomes) {
+      totalIncome += incomes[month].reduce((sum, inc) => sum + inc, 0);
+    }
+
+    let totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0) + fixedExpense;
+    let balance = totalIncome - totalExpenses;
+
+    document.getElementById("totalIncome").innerText = totalIncome.toFixed(2);
+    document.getElementById("totalExpenses").innerText = totalExpenses.toFixed(2);
+    document.getElementById("balance").innerText = balance.toFixed(2);
+
+    let warning = document.getElementById("warning");
+    warning.style.display = totalExpenses > totalIncome ? "block" : "none";
+
+    updateChart();
+  }
+
+  function updateChart() {
+    let months = [...new Set([...Object.keys(incomes), ...expenses.map(e => e.month)])];
+    months.sort();
+
+    let incomeData = months.map(month => {
+      let base = parseFloat(document.getElementById("baseIncome").value) || 0;
+      let inc = incomes[month] ? incomes[month].reduce((s, v) => s + v, 0) : 0;
+      return base + inc;
+    });
+
+    let expenseData = months.map(month => {
+      return expenses.filter(e => e.month === month).reduce((s, e) => s + e.amount, 0);
+    });
+
+    let balanceData = months.map((_, i) => incomeData[i] - expenseData[i]);
+
+    let ctx = document.getElementById("financeChart").getContext("2d");
+
+    if (financeChart) financeChart.destroy();
+
+    financeChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: months,
+        datasets: [
+          { label: "Income", data: incomeData, backgroundColor: "rgba(46, 204, 113, 0.7)" },
+          { label: "Expenses", data: expenseData, backgroundColor: "rgba(231, 76, 60, 0.7)" },
+          { label: "Balance", data: balanceData, type: "line", borderColor: "blue", fill: false }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "top" },
+          tooltip: { mode: "index", intersect: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  function exportCSV() {
+    let rows = [
+      ["Name", document.getElementById("userName").value],
+      ["Mode", document.getElementById("budgetMode").value],
+      ["Base Income", document.getElementById("baseIncome").value + " Frcs"],
+      ["Fixed Expense", document.getElementById("fixedExpense").value + " Frcs"],
+      ["Total Income", document.getElementById("totalIncome").innerText + " Frcs"],
+      ["Total Expenses", document.getElementById("totalExpenses").innerText + " Frcs"],
+      ["Balance", document.getElementById("balance").innerText + " Frcs"]
+    ];
+    let csvContent = "data:text/csv;charset=utf-8," + rows.map(r => r.join(",")).join("\n");
+    let link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", "WiseWallet_Report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("WiseWallet - Profile Report", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Name: ${document.getElementById("userName").value}`, 20, 40);
+    doc.text(`Mode: ${document.getElementById("budgetMode").value}`, 20, 50);
+    doc.text(`Total Income: ${document.getElementById("totalIncome").innerText} Frcs`, 20, 60);
+    doc.text(`Total Expenses: ${document.getElementById("totalExpenses").innerText} Frcs`, 20, 70);
+    doc.text(`Balance: ${document.getElementById("balance").innerText} Frcs`, 20, 80);
+    doc.save("WiseWallet_Report.pdf");
+  }
+</script>
+
+</body>
+</html>
